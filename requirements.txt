@@ -1,0 +1,7 @@
+arguably
+Levenshtein
+ipython
+openpyxl
+pandas
+plotly
+streamlit
