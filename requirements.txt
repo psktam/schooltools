@@ -1,6 +1,3 @@
-arguably
-Levenshtein
-fastkml[lxml]
 geopy
 ipython
 openpyxl
