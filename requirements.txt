@@ -1,7 +1,10 @@
 arguably
 Levenshtein
+fastkml[lxml]
+geopy
 ipython
 openpyxl
 pandas
 plotly
+shapely
 streamlit
