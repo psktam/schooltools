@@ -101,6 +101,12 @@ def generate_district_maps(
 
 def main():
     st.title("Find Members in Districts")
+    st.write("""
+    # Step 1: Upload CSV
+    
+    First, upload a CSV that contains the addresses of the
+    members you want to look up house districts for.
+    """)
     districts = {
         key: Polygon(shape[:, :2])
         for key, shape in mapper.load_districts("data/PlanH2316.kml").items()
@@ -119,13 +125,31 @@ def main():
             "This application works best with CSVs"
         )
 
+    st.write("""
+    # Step 2: Define Address Format
+
+    Different chapters store address data in different formats and with
+    different column headers, along with splitting address data among
+    multiple columns. Use this form to specify how address
+    data is saved in the CSV.
+
+    For example, if you save the street number + street in a column
+    called `"street_address"`, the city in a column called `"city"`, and
+    the ZIP code in a column called `"zip_code"`, in the form below,
+    you would select the columns
+    `"street_address", "city", "zip_code"`, in that order.
+    """)
+
     address_form = st.form("addresses")
     address_cols = address_form.multiselect(
         "Select the column(s) that define the address, in the order "
         "they should appear in the address",
         options=members_df.columns
     )
-    num_addresses = address_form.number_input("limit search to this many addresses", 10)
+    num_addresses = address_form.number_input(
+        "limit search to this many addresses",
+        value=members_df.shape[0]
+    )
     api_key = address_form.text_input("provide the API key")
     address_form.form_submit_button("search")
 
@@ -155,12 +179,27 @@ def main():
     locations, uncoded = geocode_addresses(api_key, addresses, 2.0)
 
     if len(uncoded) > 0:
-        st.write("# Fix addresses")
-        st.write(
-            "We were unable to locate some addresses. Use the form below to correct "
-            "them and try searching again."
-        )
-        fixing_form = st.form("fixes")
+        fixing_expander = st.expander("fixing addresses", expanded=True)
+        fixing_expander.write("# Step 2.1: Fix addresses")
+        fixing_expander.write("""
+        We were unable to locate some addresses. You can use the
+        form below to correct them and try searching again.
+
+        If you want to simply exclude an address from the search,
+        just un-mark the checkbox in the leftmost column to
+        indicate that you want to ignore the address.
+
+        The information in the "additional information" column
+        is there mostly for diagnostic purposes and to try to
+        help figure out what the real address might be.
+
+        You don't **have** to perform this section, if you feel
+        like the errors listed here are false positives. This is
+        just here to help you check if you might be missing
+        anyone.
+        """)
+
+        fixing_form = fixing_expander.form("fixes")
         fixed_strings = {}
         spacing = [0.1, 0.45, 0.45]
         header0, header1, header2 = fixing_form.columns(spacing)
@@ -185,12 +224,12 @@ def main():
         locations.update(new_locations)
 
         if len(still_uncoded) > 0 and st.session_state.get("fixes_submitted", False):
-            st.write(
+            fixing_expander.write(
                 "Still have some non-working addresses. You can "
                 "try re-editing them in the form above."
             )
             for addr_string in still_uncoded.values():
-                st.markdown(f"- {addr_string}")
+                fixing_expander.markdown(f"- {addr_string}")
 
     districts_col = {}
     for key, location in locations.items():
@@ -200,16 +239,17 @@ def main():
                 districts_col[key] = district
                 break
 
-    st.write("# Export District Data")
-    fig = generate_district_maps(
-        locations,
-        addresses,
-        districts_col,
-        districts
-    )
+    st.write("# Step 3: Export District Data")
+    st.write("""
+    The section below will allow you to download your original spreadsheet,
+    but with an additional column that indicates what house district a given
+    member lives in.
 
-    st.write(f"Member Distribution")
-    st.plotly_chart(fig, use_container_width=True)
+    You can set the name of this column to whatever value you want,
+    but the default value will be "house_district". Once you've set the
+    name, click the "download" button to save the file to your
+    local computer.
+    """)
 
     output_form = st.form("output")
     district_colname = output_form.text_input("name of district column", value="house_district")
@@ -218,6 +258,22 @@ def main():
     members_df[district_colname] = districts_col
     output_data = members_df.to_csv().encode("utf-8")
     st.download_button(label="download", data=output_data, file_name="data_with_districts.csv", mime="text/csv")
+
+    fig = generate_district_maps(
+        locations,
+        addresses,
+        districts_col,
+        districts
+    )
+
+    st.write("# Member Distribution")
+    st.write("""
+    The map below shows where members live in each district. If
+    you mouse over the map, a little camera icon should appear
+    near the upper-right corner (along with other tools), which
+    you can click on to download the image to print or share.
+    """)
+    st.plotly_chart(fig, use_container_width=True)
 
 
 if __name__ == "__main__":
