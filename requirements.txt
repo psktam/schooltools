@@ -1,7 +1,10 @@
+arguably
+cryptography
 geopy
 ipython
 openpyxl
 pandas
 plotly
+pyyaml
 shapely
 streamlit
