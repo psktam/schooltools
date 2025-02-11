@@ -2,6 +2,8 @@ from xml.etree import ElementTree
 
 import numpy as np
 import plotly.graph_objects as go
+from shapely.geometry import Point
+from shapely.geometry.polygon import Polygon
 
 
 MAPS_API_KEY="AIzaSyBePOAxXEtdbK2XdPJwIv1pWkKY6tcJBbQ"
@@ -49,3 +51,10 @@ def get_coords(address_string: str):
     """
     For a given address, get its geographical coordinates.
     """
+
+   
+def find_district(coords: Point, districts: dict[int, Polygon]) -> int | None:
+    for district, shape in districts.items():
+        if shape.contains(coords):
+            return district
+    return None

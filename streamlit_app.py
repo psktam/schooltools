@@ -7,7 +7,6 @@ import streamlit as st
 from geopy.geocoders import GoogleV3
 import plotly.graph_objects as go
 from shapely.geometry import Point
-from shapely.geometry.polygon import Polygon
 
 from src import mapper
 
@@ -17,7 +16,6 @@ def get_locator(api_key: str):
     return GoogleV3(api_key=api_key)
 
 
-@st.cache_data
 def geocode_addresses(api_key, address_dict, rate_limit):
     uncoded = {}
     coded = {}
@@ -63,7 +61,7 @@ def generate_district_maps(
     upper_right = np.array([-np.inf] * 2)
 
     for district in sorted(districts_to_idxs.keys()):
-        polygon: Polygon = district_polygons[district]
+        polygon = district_polygons[district]
         poly_points = np.array(polygon.exterior.coords)
         fig.add_trace(go.Scattermap(
             name=f"HD {district}",
@@ -103,15 +101,11 @@ def main():
     st.title("Find Members in Districts")
     st.write("""
     # Step 1: Upload CSV
-    
+
     First, upload a CSV that contains the addresses of the
     members you want to look up house districts for.
     """)
-    districts = {
-        key: Polygon(shape[:, :2])
-        for key, shape in mapper.load_districts("data/PlanH2316.kml").items()
-    }
-
+    districts = mapper.load_districts("data/PlanH2316.kml")
     member_list = st.file_uploader("Upload spreadsheet of member data")
     if member_list is None:
         return
