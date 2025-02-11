@@ -52,11 +52,9 @@ def main():
     step_name = script["starting_point"]
     while True:
         step = steps_by_name[step_name]
-        if "title" in step.keys():
-            st.write(f"# {step['title']}")
-
         st.markdown(step["text"].format(
             your_name=your_name,
+            house_district=house_district,
             rep_phone_number=rep_phone,
             rep_name=rep_name
         ))
