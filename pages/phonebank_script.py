@@ -18,7 +18,9 @@ def main():
     st.write("# Phone Banking")
     cred_form = st.form("credentials")
     your_name = cred_form.text_input("your name")
-    your_chapter = cred_form.text_input("your chapter")
+    your_chapter = cred_form.text_input("your chapter", value="Austin DSA")
+    if "dsa" not in your_chapter.lower():
+       your_chapter = f"{your_chapter} DSA"
     password = cred_form.text_input(
         "Please enter the key required to unlock the phone banking script"
     ).encode("utf-8")
@@ -64,7 +66,6 @@ def main():
 
     step_name = script["starting_point"]
     while True:
-        print(f"Rendering step {step_name}")
         if step_name == "end_and_recycle":
             st.write("Script ended. Please click the button below "
                      "to reset the script for the next call")
@@ -82,7 +83,6 @@ def main():
             ))
 
             if "responses" in step.keys():
-                print(f"Options are {list(step['responses'].keys())}")
                 next_step_label = st.selectbox(
                     "select response",
                     list(step["responses"].keys()),
@@ -94,7 +94,6 @@ def main():
 
             step_name = st.session_state["step_history"].get(step_name)
             if step_name is None:
-                print(f"breaking from {step_name}")
                 break
 
 
