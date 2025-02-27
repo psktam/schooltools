@@ -31,7 +31,7 @@ def load_districts(filepath: str):
              for c in coords_text.split()
         ])
 
-        districts[district] = coords
+        districts[district] = Polygon(coords[:, :2])
 
     return districts
 

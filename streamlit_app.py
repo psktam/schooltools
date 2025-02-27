@@ -7,6 +7,7 @@ import streamlit as st
 from geopy.geocoders import GoogleV3
 import plotly.graph_objects as go
 from shapely.geometry import Point
+from shapely.geometry.polygon import Polygon
 
 from src import mapper
 
