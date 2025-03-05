@@ -1,3 +1,5 @@
+import os
+
 from cryptography.fernet import Fernet, InvalidToken
 import pandas as pd
 import streamlit as st
@@ -14,13 +16,20 @@ def reset_history(starting_point: str):
     st.session_state["callee_house_district"] = None
 
 
+def list_available_scripts():
+    script_fnames = os.listdir("data/phonebank_scripts")
+    return sorted([os.path.splitext(fname)[0] for fname in script_fnames])
+
+
 def main():
     st.write("# Phone Banking")
     cred_form = st.form("credentials")
     your_name = cred_form.text_input("your name")
-    your_chapter = cred_form.text_input("your chapter", value="Austin DSA")
-    if "dsa" not in your_chapter.lower():
-       your_chapter = f"{your_chapter} DSA"
+    intro = cred_form.text_input(
+        "enter an introduction for yourself. It will be inserted into text "
+        "messages and phone prompts"
+    )
+    script_name = cred_form.selectbox("select script to use", list_available_scripts())
     password = cred_form.text_input(
         "Please enter the key required to unlock the phone banking script"
     ).encode("utf-8")
@@ -30,7 +39,7 @@ def main():
     except ValueError:
         return
 
-    with open("data/phonebank_scripts/2025_02_11_central_tx_script_encrypted.txt", 'rb') as fh:
+    with open(f"data/phonebank_scripts/{script_name}.yaml", 'rb') as fh:
         cipher_text = fh.read()
 
     try:
@@ -75,7 +84,7 @@ def main():
             step = steps_by_name[step_name]
             st.markdown(step["text"].format(
                 your_name=your_name,
-                your_chapter=your_chapter,
+                intro=intro,
                 house_district=house_district,
                 callee_name=callee_name,
                 rep_phone_number=rep_phone,

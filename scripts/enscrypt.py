@@ -8,8 +8,9 @@ from cryptography.fernet import Fernet
 
 @arguably.command
 def encrypt(
+    key: str, 
     input_file: str, 
-    key: str, *, 
+    *,
     output_folder: str = "data/phonebank_scripts/"
 ):
     """Encrypt a given file"""
@@ -25,9 +26,9 @@ def encrypt(
 
 @arguably.command
 def decrypt(
+    key: str,
     input_file: str, 
-    output_file: str,
-    key: str
+    output_file: str
 ):
     """Decrypt a given file"""
     cipher_suite = Fernet(key)
