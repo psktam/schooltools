@@ -105,6 +105,12 @@ def main():
             if step_name is None:
                 break
 
+    st.button(
+        "reset script", 
+        on_click=lambda: reset_history(script["starting_point"]),
+        type="primary"
+    )
+
 
 if __name__ == "__main__":
     main()
